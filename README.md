@@ -14,7 +14,7 @@ Welcome to my project! This is a **super cool** showcase of my work, featuring i
 ## 🔗 Explore Now
 Click the button below to check out the live site:
 
-[![🌍 Visit My Site 🌍](https://img.shields.io/badge/Visit%20My%20Site-FF6B6B?style=for-the-badge&logo=link&logoColor=white)]([https://amirgithubreza.github.io/Working/2.html](https://amirgithubreza.github.io/money_work_income/index.html))
+[![🌍 Visit My Site 🌍](https://img.shields.io/badge/Visit%20My%20Site-FF6B6B?style=for-the-badge&logo=link&logoColor=white)]([https://amirgithubreza.github.io/money_work_income/index.html])
 
 ## 🛠️ Getting Started
 1. Clone the repo: `git clone https://github.com/amirgithubreza/your-repo.git`
