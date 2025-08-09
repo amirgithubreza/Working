@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Daily Expense Tracker</title>
+  <style>
+    :root {
+      --primary: #27ae60;
+      --primary-hover: #1e8449;
+      --bg-light: #ecf9f1;
+      --bg-dark: #1e1e2f;
+      --text-light: #ffffff;
+      --text-dark: #333;
+      --card-bg-light: #ffffff;
+      --card-bg-dark: #2a2a40;
+    }
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: var(--bg-light);
+      margin: 0;
+      padding: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      transition: background 0.3s, color 0.3s;
+    }
+    body.dark-mode {
+      background: var(--bg-dark);
+      color: var(--text-light);
+    }
+    .container {
+      background: var(--card-bg-light);
+      padding: 2rem;
+      border-radius: 1rem;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+      max-width: 500px;
+      width: 95%;
+      transition: background 0.3s, color 0.3s;
+    }
+    body.dark-mode .container {
+      background: var(--card-bg-dark);
+    }
+    h2 {
+      text-align: center;
+    }
+    label {
+      display: block;
+      margin-top: 1rem;
+      font-weight: 600;
+    }
+    input {
+      width: 100%;
+      padding: 0.7rem;
+      border: 1px solid #ccc;
+      border-radius: 0.5rem;
+      margin-top: 0.4rem;
+    }
+    small {
+      display: block;
+      margin-top: 0.2rem;
+      color: gray;
+      font-size: 0.85rem;
+    }
+    button {
+      margin-top: 1.7rem;
+      padding: 0.8rem 1.5rem;
+      background-color: var(--primary);
+      color: white;
+      font-size: 1rem;
+      border: none;
+      border-radius: 0.5rem;
+      cursor: pointer;
+      width: 100%;
+      transition: background-color 0.3s;
+    }
+    button:hover {
+      background-color: var(--primary-hover);
+    }
+    #status {
+      margin-top: 1rem;
+      text-align: center;
+    }
+    .toggle-mode {
+      margin-top: 1.2rem;
+      font-size: 0.9rem;
+      cursor: pointer;
+      color: var(--primary);
+      text-align: center;
+    }
+    .back-btn {
+      display: inline-block;
+      margin-top: 1rem;
+      padding: 0.6rem 1rem;
+      background: #7f8c8d;
+      color: white;
+      text-decoration: none;
+      border-radius: 0.5rem;
+      transition: background 0.3s;
+      text-align: center;
+    }
+    .back-btn:hover {
+      background: #606e73;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Daily Expense Tracker</h2>
+
+    <label for="logTitle">📌 Log Title:</label>
+    <input type="text" id="logTitle" placeholder="e.g. Today's Expenses" />
+
+    <label for="moneyBefore">💰 Money You Had:</label>
+    <input type="number" id="moneyBefore" placeholder="e.g. 50000" />
+    <small id="beforeMoneyText">0 Toman (≈ 0 Rial)</small>
+
+    <label for="moneySpent">💸 Money Spent:</label>
+    <input type="number" id="moneySpent" placeholder="e.g. 12000" />
+    <small id="spentMoneyText">0 Toman (≈ 0 Rial)</small>
+
+    <label>💵 Money Left:</label>
+    <small id="leftMoneyText">0 Toman (≈ 0 Rial)</small>
+
+    <label for="itemBought">🛍 What You Bought:</label>
+    <input type="text" id="itemBought" placeholder="e.g. Groceries" />
+
+    <button id="sendBtn">Send to Telegram</button>
+    <p id="status"></p>
+
+    <div class="toggle-mode" onclick="toggleDarkMode()">Toggle Light / Dark Mode</div>
+    <a href="index.html" class="back-btn">⬅ Back to Home</a>
+  </div>
+
+  <script>
+    const telegramBotToken = '7522831243:AAEoZiQsu2HOBcZjm72a-l9k0LpeUMl3xv0';    
+    const chatId = '-1002788786486';    
+    
+    function formatNumber(num) {
+      return num.toLocaleString('en-US');
+    }
+
+    function sendMessageOnly(message) {
+      return fetch(`https://api.telegram.org/bot${telegramBotToken}/sendMessage`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          chat_id: chatId,
+          text: message,
+          parse_mode: 'Markdown'
+        })
+      });
+    }
+
+    function getPersianDateParts(date) {
+      const parts = new Intl.DateTimeFormat('fa-IR-u-ca-persian', {
+        year: 'numeric', month: 'long', day: 'numeric', weekday: 'long'
+      }).formatToParts(date);
+      const monthNum = new Intl.DateTimeFormat('fa-IR-u-ca-persian', { month: '2-digit' })
+        .formatToParts(date).find(p => p.type === 'month')?.value;
+      return {
+        year: parts.find(p => p.type === 'year')?.value,
+        monthName: parts.find(p => p.type === 'month')?.value,
+        monthNum,
+        day: parts.find(p => p.type === 'day')?.value,
+        weekday: parts.find(p => p.type === 'weekday')?.value
+      };
+    }
+
+    function getGregorianDateParts(date) {
+      const parts = new Intl.DateTimeFormat('en-US', {
+        year: 'numeric', month: 'long', day: 'numeric', weekday: 'long'
+      }).formatToParts(date);
+      const monthNum = new Intl.DateTimeFormat('en-US', { month: '2-digit' })
+        .formatToParts(date).find(p => p.type === 'month')?.value;
+      return {
+        year: parts.find(p => p.type === 'year')?.value,
+        monthName: parts.find(p => p.type === 'month')?.value,
+        monthNum,
+        day: parts.find(p => p.type === 'day')?.value,
+        weekday: parts.find(p => p.type === 'weekday')?.value
+      };
+    }
+
+    function toggleDarkMode() {
+      document.body.classList.toggle('dark-mode');
+    }
+
+    function updateMoneyDisplay() {
+      const beforeToman = parseFloat(document.getElementById('moneyBefore').value || 0);
+      const spentToman = parseFloat(document.getElementById('moneySpent').value || 0);
+      const leftToman = beforeToman - spentToman;
+
+      document.getElementById('beforeMoneyText').textContent =
+        `${formatNumber(beforeToman)} Toman (≈ ${formatNumber(beforeToman * 10)} Rial)`;
+
+      document.getElementById('spentMoneyText').textContent =
+        `${formatNumber(spentToman)} Toman (≈ ${formatNumber(spentToman * 10)} Rial)`;
+
+      document.getElementById('leftMoneyText').textContent =
+        `${formatNumber(leftToman)} Toman (≈ ${formatNumber(leftToman * 10)} Rial)`;
+    }
+
+    document.getElementById('moneyBefore').addEventListener('input', updateMoneyDisplay);
+    document.getElementById('moneySpent').addEventListener('input', updateMoneyDisplay);
+
+    document.getElementById('sendBtn').addEventListener('click', async () => {
+      const title = document.getElementById('logTitle').value.trim();
+      const beforeToman = parseFloat(document.getElementById('moneyBefore').value || 0);
+      const spentToman = parseFloat(document.getElementById('moneySpent').value || 0);
+      const item = document.getElementById('itemBought').value.trim();
+
+      if (!title || !beforeToman || !spentToman || !item) {
+        document.getElementById('status').textContent = '⚠️ Please fill all fields';
+        return;
+      }
+
+      const beforeRial = beforeToman * 10;
+      const spentRial = spentToman * 10;
+      const remainingToman = beforeToman - spentToman;
+      const remainingRial = remainingToman * 10;
+
+      const now = new Date();
+      const p = getPersianDateParts(now);
+      const g = getGregorianDateParts(now);
+
+      const msg = `📌 *${title}*
+📅 *Persian Date*\nسال: ${p.year}\nماه: ${p.monthName} (${p.monthNum})\nروز: ${p.day}\nروز هفته: ${p.weekday}
+📆 *Gregorian Date*\nYear: ${g.year}\nMonth: ${g.monthName} (${g.monthNum})\nDay: ${g.day}\nWeekday: ${g.weekday}
+
+💰 *Money Before:* ${formatNumber(beforeToman)} Toman (${formatNumber(beforeRial)} Rial)
+💸 *Money Spent:* ${formatNumber(spentToman)} Toman (${formatNumber(spentRial)} Rial)
+💵 *Money Left:* ${formatNumber(remainingToman)} Toman (${formatNumber(remainingRial)} Rial)
+🛍 *Item Bought:* ${item}`;
+
+      try {
+        await sendMessageOnly(msg);
+        document.getElementById('status').textContent = '✅ Sent successfully';
+      } catch {
+        document.getElementById('status').textContent = '❌ Failed to send';
+      }
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>💰 Job Payment Bot</title>
+<style>
+  :root {
+    --primary: #3498db;
+    --primary-hover: #2980b9;
+    --bg-light: #e9f5ff;
+    --bg-dark: #1e1e2f;
+    --text-light: #fff;
+    --text-dark: #333;
+    --card-bg-light: #fff;
+    --card-bg-dark: #2a2a40;
+  }
+  body {
+    font-family: 'Segoe UI', sans-serif;
+    background: var(--bg-light);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    margin: 0;
+    transition: background 0.3s, color 0.3s;
+  }
+  body.dark-mode { background: var(--bg-dark); color: var(--text-light); }
+  .container {
+    background: var(--card-bg-light);
+    padding: 2rem;
+    border-radius: 1rem;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    width: 95%;
+    max-width: 500px;
+    transition: background 0.3s, color 0.3s;
+  }
+  body.dark-mode .container { background: var(--card-bg-dark); }
+  h2 { text-align: center; margin-bottom: 1rem; }
+  label { display: block; margin-top: 1.2rem; font-weight: 600; }
+  input, textarea {
+    width: 100%; padding: 0.7rem; border: 1px solid #ccc;
+    border-radius: 0.5rem; margin-top: 0.4rem;
+  }
+  button {
+    margin-top: 1.7rem; padding: 0.8rem;
+    background-color: var(--primary); color: white;
+    font-size: 1rem; border: none; border-radius: 0.5rem;
+    cursor: pointer; width: 100%;
+  }
+  button:hover { background-color: var(--primary-hover); }
+  #status { text-align: center; margin-top: 1rem; }
+  .toggle-mode { margin-top: 1.2rem; font-size: 0.9rem; text-align: center; cursor: pointer; color: var(--primary); }
+  #previewAmount { font-weight: bold; margin-top: 1rem; text-align: center; }
+  .back-btn {
+    display: inline-block; margin-top: 1rem; padding: 0.6rem 1rem;
+    background: #7f8c8d; color: white; text-decoration: none;
+    border-radius: 0.5rem; transition: background 0.3s;
+  }
+  .back-btn:hover { background: #606e73; }
+</style>
+</head>
+<body>
+<div class="container">
+  <h2>💰 Job Payment Bot</h2>
+
+  <label for="topic">📌 Topic:</label>
+  <input type="text" id="topic" placeholder="Enter topic (e.g. Project A Payments)" />
+
+  <label for="jobName">💼 Job Name:</label>
+  <input type="text" id="jobName" placeholder="Enter job name" />
+
+  <label for="amount">💰 Amount (Toman):</label>
+  <input type="number" id="amount" placeholder="Enter amount" />
+  <p id="previewAmount">—</p>
+
+  <label for="notes">📝 Notes:</label>
+  <textarea id="notes" rows="3" placeholder="Optional notes..."></textarea>
+
+  <label for="file">📎 Attach File:</label>
+  <input type="file" id="file" accept="image/*,application/pdf,.doc,.docx,.xls,.xlsx,.txt" />
+
+  <button id="sendBtn">Send to Telegram</button>
+  <p id="status"></p>
+
+  <div class="toggle-mode" onclick="toggleDarkMode()">Toggle Light / Dark Mode</div>
+  <a href="index.html" class="back-btn">⬅ Back to Home</a>
+</div>
+
+<script>
+const telegramBotToken = '7522831243:AAEoZiQsu2HOBcZjm72a-l9k0LpeUMl3xv0';    
+const chatId = '-1002895335697';    
+   
+const motivationalMessages = [
+  "🔥 Great job! Keep the money flowing!",
+  "💎 Another step towards success!",
+  "🚀 You’re on your way to the top!",
+  "💼 Hard work always pays off!",
+  "🎯 Goal reached, on to the next!",
+  "📈 Every effort today builds tomorrow’s fortune!",
+  "🌟 You just turned time into gold!",
+  "💪 Hustle in silence, let success make the noise!",
+  "💰 That’s how champions earn!",
+  "🌞 You’re making today count!"
+];
+
+const persianMonths = ["فروردین","اردیبهشت","خرداد","تیر","مرداد","شهریور","مهر","آبان","آذر","دی","بهمن","اسفند"];
+const gregorianMonths = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+
+function gregorianToPersian(gy, gm, gd) {
+  const g_d_m = [0,31,59,90,120,151,181,212,243,273,304,334];
+  let jy = (gy <= 1600) ? 0 : 979;
+  gy -= (gy <= 1600) ? 621 : 1600;
+  let gy2 = (gm > 2) ? (gy + 1) : gy;
+  let days = (365 * gy) + Math.floor((gy2 + 3) / 4) - Math.floor((gy2 + 99) / 100) + Math.floor((gy2 + 399) / 400) - 80 + gd + g_d_m[gm-1];
+  jy += 33 * Math.floor(days / 12053);
+  days %= 12053;
+  jy += 4 * Math.floor(days / 1461);
+  days %= 1461;
+  if (days > 365) {
+    jy += Math.floor((days - 1) / 365);
+    days = (days - 1) % 365;
+  }
+  let jm = (days < 186) ? 1 + Math.floor(days / 31) : 7 + Math.floor((days - 186) / 30);
+  let jd = 1 + ((days < 186) ? (days % 31) : ((days - 186) % 30));
+  return [jy + 1, jm, jd];
+}
+
+function sendFileWithCaption(file, caption) {
+  const formData = new FormData();
+  formData.append("chat_id", chatId);
+  formData.append("caption", caption);
+  formData.append("parse_mode", "Markdown");
+  if (file.type.startsWith("image/")) {
+    formData.append("photo", file);
+    return fetch(`https://api.telegram.org/bot${telegramBotToken}/sendPhoto`, { method: "POST", body: formData });
+  } else {
+    formData.append("document", file);
+    return fetch(`https://api.telegram.org/bot${telegramBotToken}/sendDocument`, { method: "POST", body: formData });
+  }
+}
+
+function sendMessageOnly(message) {
+  return fetch(`https://api.telegram.org/bot${telegramBotToken}/sendMessage`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ chat_id: chatId, text: message, parse_mode: "Markdown" })
+  });
+}
+
+function toggleDarkMode() {
+  document.body.classList.toggle("dark-mode");
+}
+
+document.getElementById("amount").addEventListener("input", () => {
+  const amountToman = parseFloat(document.getElementById("amount").value) || 0;
+  const rial = amountToman * 10;
+  document.getElementById("previewAmount").textContent = `💰 ${amountToman.toLocaleString()} Toman | ${rial.toLocaleString()} Rial`;
+});
+
+document.getElementById("sendBtn").addEventListener("click", async () => {
+  const topic = document.getElementById("topic").value.trim();
+  const jobName = document.getElementById("jobName").value.trim();
+  const amountToman = parseFloat(document.getElementById("amount").value);
+  const notes = document.getElementById("notes").value.trim();
+  const file = document.getElementById("file").files[0];
+
+  if (!topic || !jobName || !amountToman) {
+    document.getElementById("status").textContent = "⚠️ Please fill in topic, job name, and amount";
+    return;
+  }
+
+  const rial = amountToman * 10;
+  const now = new Date();
+  const gYear = now.getFullYear();
+  const gMonth = now.getMonth() + 1;
+  const gDay = now.getDate();
+  const gWeekday = now.toLocaleString("en-US", { weekday: "long" });
+
+  const [pYear, pMonth, pDay] = gregorianToPersian(gYear, gMonth, gDay);
+  const pWeekday = now.toLocaleString("fa-IR", { weekday: "long" });
+
+  const randomMsg = motivationalMessages[Math.floor(Math.random() * motivationalMessages.length)];
+
+  const msg = `📌 *Topic:* ${topic}
+
+🗓 *Persian Date*
+سال: ${pYear}
+ماه: ${persianMonths[pMonth - 1]} (${pMonth.toString().padStart(2, "0")})
+روز: ${pDay.toString().padStart(2, "0")}
+روز هفته: ${pWeekday}
+
+📆 *Gregorian Date*
+Year: ${gYear}
+Month: ${gregorianMonths[gMonth - 1]} (${gMonth.toString().padStart(2, "0")})
+Day: ${gDay.toString().padStart(2, "0")}
+Weekday: ${gWeekday}
+
+💼 *Job:* ${jobName}
+💰 *Amount:* ${amountToman.toLocaleString()} Toman | ${rial.toLocaleString()} Rial
+
+📝 *Notes:* ${notes || "None"}
+
+${randomMsg}`;
+
+  try {
+    if (file) {
+      await sendFileWithCaption(file, msg);
+    } else {
+      await sendMessageOnly(msg);
+    }
+    document.getElementById("status").textContent = "✅ Sent successfully";
+  } catch (e) {
+    console.error(e);
+    document.getElementById("status").textContent = "❌ Failed to send";
+  }
+});
+</script>
+</body>
+</html>
