@@ -29,7 +29,7 @@ Welcome — this repo showcases a small, modern website and assets for the **My 
 ## 🛠️ Getting Started (local)
 ```bash
 # 1. Clone this repo (replace with your repo URL)
-git clone https://github.com/amirgithubreza/your-repo.git
+git clone https://github.com/amirgithubreza/money_work_income.git
 
 # 2. Enter repo
 cd your-repo
