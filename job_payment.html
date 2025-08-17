@@ -70,8 +70,11 @@
   <label for="jobName">💼 Job Name:</label>
   <input type="text" id="jobName" placeholder="Enter job name" />
 
-  <label for="amount">💰 Amount (Toman):</label>
-  <input type="number" id="amount" placeholder="Enter amount" />
+  <label for="beforeMoney">💵 Money Before (Toman):</label>
+  <input type="number" id="beforeMoney" placeholder="Enter how much you had before" />
+
+  <label for="amount">💰 Money Received (Toman):</label>
+  <input type="number" id="amount" placeholder="Enter how much you received" />
   <p id="previewAmount">—</p>
 
   <label for="notes">📝 Notes:</label>
@@ -88,9 +91,9 @@
 </div>
 
 <script>
-const telegramBotToken = '7522831243:AAEoZiQsu2HOBcZjm72a-l9k0LpeUMl3xv0';    
-const chatId = '-1002895335697';    
-   
+const telegramBotToken = '7522831243:AAEoZiQsu2HOBcZjm72a-l9k0LpeUMl3xv0';      
+const chatId = '-1002895335697';      
+     
 const motivationalMessages = [
   "🔥 Great job! Keep the money flowing!",
   "💎 Another step towards success!",
@@ -152,25 +155,34 @@ function toggleDarkMode() {
   document.body.classList.toggle("dark-mode");
 }
 
-document.getElementById("amount").addEventListener("input", () => {
-  const amountToman = parseFloat(document.getElementById("amount").value) || 0;
-  const rial = amountToman * 10;
-  document.getElementById("previewAmount").textContent = `💰 ${amountToman.toLocaleString()} Toman | ${rial.toLocaleString()} Rial`;
-});
+function updatePreview() {
+  const beforeMoney = parseFloat(document.getElementById("beforeMoney").value) || 0;
+  const received = parseFloat(document.getElementById("amount").value) || 0;
+  const total = beforeMoney + received;
+
+  document.getElementById("previewAmount").textContent = 
+    `💵 Before: ${beforeMoney.toLocaleString()} Toman | ${ (beforeMoney*10).toLocaleString()} Rial
+💰 Received: ${received.toLocaleString()} Toman | ${ (received*10).toLocaleString()} Rial
+📊 Total: ${total.toLocaleString()} Toman | ${ (total*10).toLocaleString()} Rial`;
+}
+
+document.getElementById("beforeMoney").addEventListener("input", updatePreview);
+document.getElementById("amount").addEventListener("input", updatePreview);
 
 document.getElementById("sendBtn").addEventListener("click", async () => {
   const topic = document.getElementById("topic").value.trim();
   const jobName = document.getElementById("jobName").value.trim();
-  const amountToman = parseFloat(document.getElementById("amount").value);
+  const beforeMoney = parseFloat(document.getElementById("beforeMoney").value) || 0;
+  const received = parseFloat(document.getElementById("amount").value) || 0;
+  const total = beforeMoney + received;
   const notes = document.getElementById("notes").value.trim();
   const file = document.getElementById("file").files[0];
 
-  if (!topic || !jobName || !amountToman) {
-    document.getElementById("status").textContent = "⚠️ Please fill in topic, job name, and amount";
+  if (!topic || !jobName || !received) {
+    document.getElementById("status").textContent = "⚠️ Please fill in topic, job name, and received money";
     return;
   }
 
-  const rial = amountToman * 10;
   const now = new Date();
   const gYear = now.getFullYear();
   const gMonth = now.getMonth() + 1;
@@ -197,7 +209,10 @@ Day: ${gDay.toString().padStart(2, "0")}
 Weekday: ${gWeekday}
 
 💼 *Job:* ${jobName}
-💰 *Amount:* ${amountToman.toLocaleString()} Toman | ${rial.toLocaleString()} Rial
+
+💵 *Before:* ${beforeMoney.toLocaleString()} Toman | ${(beforeMoney*10).toLocaleString()} Rial
+💰 *Received:* ${received.toLocaleString()} Toman | ${(received*10).toLocaleString()} Rial
+📊 *Total:* ${total.toLocaleString()} Toman | ${(total*10).toLocaleString()} Rial
 
 📝 *Notes:* ${notes || "None"}
 
