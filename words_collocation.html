@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>📚 Words, Collocations & German Logger</title>
+  <style>
+    :root {
+      --primary: #3498db;
+      --primary-hover: #2980b9;
+      --bg-light: #f4faff;
+      --bg-dark: #1e1e2f;
+      --text-light: #fff;
+      --text-dark: #333;
+      --card-light: #fff;
+      --card-dark: #2a2a40;
+    }
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: var(--bg-light);
+      color: var(--text-dark);
+      margin: 0;
+      padding: 1rem;
+      display: flex;
+      justify-content: center;
+    }
+    body.dark-mode {
+      background: var(--bg-dark);
+      color: var(--text-light);
+    }
+    .container {
+      background: var(--card-light);
+      padding: 2rem;
+      border-radius: 1rem;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+      width: 95%;
+      max-width: 600px;
+      transition: 0.3s;
+    }
+    body.dark-mode .container {
+      background: var(--card-dark);
+    }
+    h2 { margin-bottom: 0.5rem; }
+    label {
+      font-weight: 600;
+      display: block;
+      margin-top: 1rem;
+    }
+    input, textarea {
+      width: 100%;
+      padding: 0.7rem;
+      border-radius: 0.5rem;
+      border: 1px solid #ccc;
+      margin-top: 0.3rem;
+      font-size: 1rem;
+    }
+    textarea { resize: vertical; }
+    button {
+      margin-top: 1rem;
+      padding: 0.8rem;
+      width: 100%;
+      border: none;
+      border-radius: 0.5rem;
+      font-size: 1rem;
+      cursor: pointer;
+      background: var(--primary);
+      color: #fff;
+    }
+    button:hover { background-color: var(--primary-hover); }
+  #status { text-align: center; margin-top: 1rem; }
+  .toggle-mode { margin-top: 1.2rem; font-size: 0.9rem; text-align: center; cursor: pointer; color: var(--primary); }
+  #previewAmount { font-weight: bold; margin-top: 1rem; text-align: center; }
+  .back-btn {
+    display: inline-block; margin-top: 1rem; padding: 0.6rem 1rem;
+    background: #7f8c8d; color: white; text-decoration: none;
+    border-radius: 0.5rem; transition: background 0.3s;
+  }
+  .back-btn:hover { background: #606e73; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Words Section -->
+    <h2>📚 Words</h2>
+    <label for="wordTitle">Word:</label>
+    <input type="text" id="wordTitle" placeholder="Enter word" />
+    <label for="wordNotes">Notes:</label>
+    <textarea id="wordNotes" rows="3" placeholder="Add notes about the word"></textarea>
+    <button id="sendWordBtn">Send Word to Channel</button>
+
+    <!-- Collocations Section -->
+    <h2 style="margin-top:2rem;">📝 Collocations</h2>
+    <label for="collTitle">Collocation:</label>
+    <input type="text" id="collTitle" placeholder="Enter collocation" />
+    <label for="collNotes">Notes:</label>
+    <textarea id="collNotes" rows="3" placeholder="Add notes about the collocation"></textarea>
+    <button id="sendCollBtn">Send Collocation to Channel</button>
+
+    <!-- German Words Section -->
+    <h2 style="margin-top:2rem;">🇩🇪 German Words</h2>
+    <label for="germanTitle">German Word:</label>
+    <input type="text" id="germanTitle" placeholder="Enter German word" />
+    <label for="germanNotes">Notes:</label>
+    <textarea id="germanNotes" rows="3" placeholder="Add notes about the German word"></textarea>
+    <button id="sendGermanBtn">to the German channel </button>
+
+    <p id="status"></p>
+    <div class="toggle" onclick="toggleMode()">🌙 Toggle Dark Mode</div>
+    <a href="index.html" class="back-btn">⬅ Back to Home</a>
+  </div>
+
+<script>
+const botToken = "7522831243:AAEoZiQsu2HOBcZjm72a-l9k0LpeUMl3xv0";     // 🔹 Replace with your bot token
+const wordChannelId = "-1002871817583";     // 🔹 Replace with Word channel/chat ID
+const collChannelId = "-1002960169927";     // 🔹 Replace with Collocation channel/chat ID
+const germanChannelId = "-1002861375288";   // 🔹 Replace with German words channel/chat ID
+
+// Helper: send to Telegram
+async function sendToTelegram(chatId, message, successMsg, errorMsg) {
+  try {
+    await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ chat_id: chatId, text: message, parse_mode: "Markdown" })
+    });
+    document.getElementById("status").textContent = successMsg;
+  } catch (err) {
+    document.getElementById("status").textContent = errorMsg;
+  }
+}
+
+// Send Word
+document.getElementById("sendWordBtn").addEventListener("click", () => {
+  const title = document.getElementById("wordTitle").value.trim();
+  const notes = document.getElementById("wordNotes").value.trim();
+  if (!title) { document.getElementById("status").textContent = "⚠️ Please enter a word."; return; }
+  const msg = `📚 *Word*\n\n🔹 ${title}\n📝 Notes: ${notes || "—"}`;
+  sendToTelegram(wordChannelId, msg, "✅ Word sent!", "❌ Failed to send word.");
+});
+
+// Send Collocation
+document.getElementById("sendCollBtn").addEventListener("click", () => {
+  const title = document.getElementById("collTitle").value.trim();
+  const notes = document.getElementById("collNotes").value.trim();
+  if (!title) { document.getElementById("status").textContent = "⚠️ Please enter a collocation."; return; }
+  const msg = `📝 *Collocation*\n\n🔸 ${title}\n📝 Notes: ${notes || "—"}`;
+  sendToTelegram(collChannelId, msg, "✅ Collocation sent!", "❌ Failed to send collocation.");
+});
+
+// Send German Word
+document.getElementById("sendGermanBtn").addEventListener("click", () => {
+  const title = document.getElementById("germanTitle").value.trim();
+  const notes = document.getElementById("germanNotes").value.trim();
+  if (!title) { document.getElementById("status").textContent = "⚠️ Please enter a German word."; return; }
+  const msg = `🇩🇪 *German Word*\n\n🔹 ${title}\n📝 Notes: ${notes || "—"}`;
+  sendToTelegram(germanChannelId, msg, "✅ German word sent!", "❌ Failed to send German word.");
+});
+
+// Dark mode toggle
+function toggleMode() {
+  document.body.classList.toggle("dark-mode");
+}
+</script>
+</body>
+</html>
