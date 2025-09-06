@@ -104,6 +104,15 @@
     <textarea id="germanNotes" rows="3" placeholder="Add notes about the German word"></textarea>
     <button id="sendGermanBtn">to the German channel </button>
 
+      <!-- Russian Words Section -->
+    <h2 style="margin-top:2rem;">Russia</h2>
+    <label for="RussianTitle">Russian Word:</label>
+    <input type="text" id="RussianTitle" placeholder="Enter Russian word" />
+    <label for="RussianNotes">Notes:</label>
+    <textarea id="germanNotes" rows="3" placeholder="Add notes about the Russian word"></textarea>
+    <button id="sendRussianBtn">to the Russian channel </button>
+    
+
     <p id="status"></p>
     <div class="toggle" onclick="toggleMode()">🌙 Toggle Dark Mode</div>
     <a href="index.html" class="back-btn">⬅ Back to Home</a>
@@ -114,6 +123,8 @@ const botToken = "7522831243:AAEoZiQsu2HOBcZjm72a-l9k0LpeUMl3xv0";     // 🔹 R
 const wordChannelId = "-1002871817583";     // 🔹 Replace with Word channel/chat ID
 const collChannelId = "-1002960169927";     // 🔹 Replace with Collocation channel/chat ID
 const germanChannelId = "-1002861375288";   // 🔹 Replace with German words channel/chat ID
+const RussianChannelId = "-1002915103658";   // 🔹 Replace with German words channel/chat ID
+
 
 // Helper: send to Telegram
 async function sendToTelegram(chatId, message, successMsg, errorMsg) {
@@ -156,6 +167,13 @@ document.getElementById("sendGermanBtn").addEventListener("click", () => {
   sendToTelegram(germanChannelId, msg, "✅ German word sent!", "❌ Failed to send German word.");
 });
 
+  document.getElementById("sendRussianBtn").addEventListener("click", () => {
+  const title = document.getElementById("RussianTitle").value.trim();
+  const notes = document.getElementById("RussianNotes").value.trim();
+  if (!title) { document.getElementById("status").textContent = "⚠️ Please enter a Russian word."; return; }
+  const msg = `*Russian Word*\n\n🔹 ${title}\n📝 Notes: ${notes || "—"}`;
+  sendToTelegram(RussianChannelId, msg, "✅ Russian word sent!", "❌ Failed to send Russian word.");
+});
 // Dark mode toggle
 function toggleMode() {
   document.body.classList.toggle("dark-mode");
