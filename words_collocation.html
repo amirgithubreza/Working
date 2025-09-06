@@ -103,15 +103,15 @@
     <label for="germanNotes">Notes:</label>
     <textarea id="germanNotes" rows="3" placeholder="Add notes about the German word"></textarea>
     <button id="sendGermanBtn">to the German channel </button>
-
-      <!-- Russian Words Section -->
-    <h2 style="margin-top:2rem;">Russia</h2>
+  
+    <!-- Russian Words Section -->
+    <h2 style="margin-top:2rem;">🇷🇺 Russian Words</h2>
     <label for="RussianTitle">Russian Word:</label>
     <input type="text" id="RussianTitle" placeholder="Enter Russian word" />
     <label for="RussianNotes">Notes:</label>
-    <textarea id="germanNotes" rows="3" placeholder="Add notes about the Russian word"></textarea>
-    <button id="sendRussianBtn">to the Russian channel </button>
-    
+    <textarea id="RussianNotes" rows="3" placeholder="Add notes about the Russian word"></textarea>
+    <button id="sendRussianBtn">Send to Russian Channel</button>
+  
 
     <p id="status"></p>
     <div class="toggle" onclick="toggleMode()">🌙 Toggle Dark Mode</div>
@@ -123,7 +123,8 @@ const botToken = "7522831243:AAEoZiQsu2HOBcZjm72a-l9k0LpeUMl3xv0";     // 🔹 R
 const wordChannelId = "-1002871817583";     // 🔹 Replace with Word channel/chat ID
 const collChannelId = "-1002960169927";     // 🔹 Replace with Collocation channel/chat ID
 const germanChannelId = "-1002861375288";   // 🔹 Replace with German words channel/chat ID
-const RussianChannelId = "-1002915103658";   // 🔹 Replace with German words channel/chat ID
+const RussianChannelId = "-1002915103658";   // 🔹 Replace with Russian words channel/chat ID
+
 
 
 // Helper: send to Telegram
